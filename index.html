@@ -401,9 +401,29 @@
     const LABELS = { auto: '자동', light: '라이트', dark: '다크' };
 
     // ===== Memo =====
-    memo.value = localStorage.getItem(STORAGE_KEY) || '';
-    memo.addEventListener('input', () => {
-      localStorage.setItem(STORAGE_KEY, memo.value);
+    function persistMemo() {
+      try { localStorage.setItem(STORAGE_KEY, memo.value); } catch (_) {}
+    }
+
+    // 불러올 때 끝에 줄바꿈 자동 추가 (이미 \n으로 끝나면 그대로)
+    const saved = localStorage.getItem(STORAGE_KEY) || '';
+    const initial = (saved.length > 0 && !saved.endsWith('\n')) ? saved + '\n' : saved;
+    memo.value = initial;
+    if (initial !== saved) persistMemo();
+    // 커서를 맨 끝으로
+    requestAnimationFrame(() => {
+      try { memo.setSelectionRange(memo.value.length, memo.value.length); } catch (_) {}
+      memo.scrollTop = memo.scrollHeight;
+    });
+
+    // 매 입력마다 저장
+    memo.addEventListener('input', persistMemo);
+    // 안전망: 앱이 백그라운드/종료될 때도 한 번 더 저장
+    memo.addEventListener('blur', persistMemo);
+    window.addEventListener('pagehide', persistMemo);
+    window.addEventListener('beforeunload', persistMemo);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') persistMemo();
     });
 
     // ===== Snackbar =====
