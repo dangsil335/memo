@@ -21,7 +21,6 @@
 
   <title>메모</title>
   <style>
-    /* ===== LIGHT (default) ===== */
     :root {
       --bg: #FAFAF8;
       --surface: #FAFAF8;
@@ -36,7 +35,6 @@
       --pill-outline-border: rgba(30, 27, 46, 0.10);
       --shadow-pill-outline: 0 4px 16px rgba(30, 27, 46, 0.06);
 
-      /* 메모 색상 팔레트 (라이트) */
       --memo-color-red:   #E53935;
       --memo-color-blue:  #1E88E5;
       --memo-color-green: #43A047;
@@ -44,10 +42,8 @@
       --memo-color-black: #1E1B2E;
 
       --memo-font-size: 13pt;
-      --memo-color: var(--memo-color-black);
     }
 
-    /* ===== DARK ===== */
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
         --bg: #0F0D14;
@@ -91,22 +87,12 @@
       --memo-color-black: #F3F1FF;
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overscroll-behavior: none;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; height: 100%; overscroll-behavior: none; }
 
     body {
-      font-family: "Pretendard Variable", Pretendard, -apple-system,
-        BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR",
-        "Helvetica Neue", Arial, sans-serif;
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+        "Apple SD Gothic Neo", "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
       background: var(--bg);
       color: var(--text-primary);
       height: 100vh;
@@ -127,11 +113,9 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      border: none;
       outline: none;
-      resize: none;
       background: transparent;
-      color: var(--memo-color);
+      color: var(--text-primary);
       font-size: var(--memo-font-size);
       font-weight: 420;
       line-height: 1.85;
@@ -143,9 +127,11 @@
       -webkit-user-select: text;
       user-select: text;
       overflow-y: auto;
-      -webkit-appearance: none;
       caret-color: var(--accent);
-      transition: color 0.25s ease, font-size 0.2s ease;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      transition: font-size 0.2s ease;
 
       -webkit-mask-image: linear-gradient(
         to bottom,
@@ -162,17 +148,33 @@
         transparent 100%
       );
 
-      scrollbar-width: thin;
-      scrollbar-color: var(--accent) transparent;
-
+      scrollbar-width: none;
       animation: fadeIn 0.6s ease-out 0.05s both;
     }
-
     .memo::-webkit-scrollbar { width: 0; }
-    .memo::-webkit-scrollbar-track { background: transparent; }
-    .memo::-webkit-scrollbar-thumb { background: transparent; }
 
-    /* 종이결 오버레이 */
+    @keyframes caretPulse {
+      0%, 100% { caret-color: var(--accent); }
+      50%      { caret-color: var(--accent-glow); }
+    }
+    .memo:focus {
+      animation: fadeIn 0.6s ease-out 0.05s both,
+                 caretPulse 2.4s ease-in-out 1s infinite;
+    }
+
+    /* 메모 색상 클래스 - CSS 변수 참조해서 테마 자동 적응 */
+    .memo .mc-red   { color: var(--memo-color-red); }
+    .memo .mc-blue  { color: var(--memo-color-blue); }
+    .memo .mc-green { color: var(--memo-color-green); }
+    .memo .mc-gray  { color: var(--memo-color-gray); }
+    .memo .mc-black { color: var(--memo-color-black); }
+
+    /* 서식 태그 - 기본 스타일 명시 (브라우저별 차이 방지) */
+    .memo b, .memo strong { font-weight: 700; }
+    .memo i, .memo em { font-style: italic; }
+    .memo u, .memo ins { text-decoration: underline; }
+
+    /* 종이결 */
     .paper-grain {
       position: fixed;
       inset: 0;
@@ -194,7 +196,7 @@
       mix-blend-mode: screen;
     }
 
-    /* 얇은 스크롤 진행 인디케이터 */
+    /* 스크롤 진행 */
     .scroll-progress {
       position: fixed;
       right: 0;
@@ -210,17 +212,7 @@
     }
     .scroll-progress.visible { opacity: 0.4; }
 
-    @keyframes caretPulse {
-      0%, 100% { caret-color: var(--accent); }
-      50%      { caret-color: var(--accent-glow); }
-    }
-    .memo:focus {
-      animation: fadeIn 0.6s ease-out 0.05s both,
-                 caretPulse 2.4s ease-in-out 1s infinite;
-    }
-
-    .top-actions-left,
-    .top-actions-right {
+    .top-actions-left, .top-actions-right {
       position: absolute;
       top: calc(12px + env(safe-area-inset-top));
       display: flex;
@@ -229,7 +221,7 @@
     }
     .top-actions-left {
       left: calc(16px + env(safe-area-inset-left));
-      animation: dropInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+      animation: dropIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
     }
     .top-actions-right {
       right: calc(16px + env(safe-area-inset-right));
@@ -257,14 +249,12 @@
       height: 18px;
       transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-
     .pill.outline {
       background: var(--pill-outline-bg);
       color: var(--text-secondary);
       border: 1px solid var(--pill-outline-border);
       box-shadow: var(--shadow-pill-outline);
     }
-
     .pill .theme-icon { display: none; }
     .pill .theme-icon.active {
       display: block;
@@ -281,12 +271,12 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: var(--memo-color);
+      background: var(--memo-color-black);
       transition: background 0.2s ease;
       box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
     }
 
-    /* ===== Popover ===== */
+    /* 사이즈/색상 팝오버 */
     .popover {
       position: absolute;
       top: calc(56px + env(safe-area-inset-top));
@@ -304,7 +294,6 @@
       animation: popoverIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
     .popover.show { display: flex; }
-
     .popover-item {
       min-width: 30px;
       height: 30px;
@@ -333,6 +322,46 @@
       border-radius: 50%;
       box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
     }
+
+    /* 서식 툴바 (B / I / S) */
+    .format-toolbar {
+      position: fixed;
+      display: none;
+      background: var(--text-primary);
+      border-radius: 16px;
+      padding: 4px;
+      gap: 2px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.32);
+      z-index: 50;
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      animation: popIn 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .format-toolbar.show { display: flex; }
+    .format-toolbar button {
+      width: 38px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--bg);
+      font-size: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      transition: background 0.15s ease, color 0.15s ease;
+      padding: 0;
+    }
+    .format-toolbar button:active { background: rgba(255,255,255,0.12); }
+    .format-toolbar button.active {
+      background: var(--accent);
+      color: var(--accent-on);
+    }
+    .fmt-b { font-weight: 800; }
+    .fmt-i { font-style: italic; font-weight: 600; }
+    .fmt-u { text-decoration: underline; font-weight: 600; }
 
     .snackbar {
       position: fixed;
@@ -379,22 +408,9 @@
       animation: popIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
       text-align: left;
     }
-    .modal h3 {
-      margin: 0 0 8px;
-      font-size: 17px;
-      font-weight: 700;
-    }
-    .modal p {
-      margin: 0 0 22px;
-      font-size: 14px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 4px;
-    }
+    .modal h3 { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
+    .modal p { margin: 0 0 22px; font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 4px; }
     .modal button {
       padding: 10px 18px;
       border: none;
@@ -416,7 +432,6 @@
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes dropIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes dropInLeft { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes popIn { 0% { opacity: 0; transform: scale(0.6); } 100% { opacity: 1; transform: scale(1); } }
     @keyframes popoverIn { from { opacity: 0; transform: translateY(-6px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes iconPop { 0% { opacity: 0; transform: scale(0.5) rotate(-45deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
@@ -426,16 +441,18 @@
   <div class="paper-grain" aria-hidden="true"></div>
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
-  <textarea
+  <div
     class="memo"
     id="memo"
-    autofocus
-    autocomplete="off"
+    contenteditable="true"
+    spellcheck="false"
     autocorrect="off"
     autocapitalize="sentences"
-    spellcheck="false"></textarea>
+    inputmode="text"
+    role="textbox"
+    aria-multiline="true"></div>
 
-  <!-- 좌상단: 사이즈 / 색상 -->
+  <!-- 좌상단 -->
   <div class="top-actions-left">
     <button class="pill outline" id="sizeBtn" aria-label="글씨 크기">
       <span class="size-label" id="sizeLabel">13</span>
@@ -445,12 +462,10 @@
     </button>
   </div>
 
-  <!-- 사이즈 팝오버 -->
   <div class="popover" id="sizePopover"></div>
-  <!-- 색상 팝오버 -->
   <div class="popover" id="colorPopover"></div>
 
-  <!-- 우상단: 테마 / 휴지통 -->
+  <!-- 우상단 -->
   <div class="top-actions-right">
     <button class="pill outline" id="themeToggle" aria-label="테마 전환">
       <svg class="theme-icon" data-mode="auto" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -479,6 +494,13 @@
         <path d="M6,19c0,1.1 0.9,2 2,2h8c1.1,0 2,-0.9 2,-2V7H6v12zM19,4h-3.5l-1,-1h-5l-1,1H5v2h14V4z" />
       </svg>
     </button>
+  </div>
+
+  <!-- 서식 툴바 -->
+  <div class="format-toolbar" id="formatToolbar" role="toolbar" aria-label="텍스트 서식">
+    <button data-cmd="bold" aria-label="굵게"><span class="fmt-b">B</span></button>
+    <button data-cmd="italic" aria-label="기울임"><span class="fmt-i">I</span></button>
+    <button data-cmd="underline" aria-label="밑줄"><span class="fmt-u">U</span></button>
   </div>
 
   <div class="snackbar" id="snackbar"></div>
@@ -511,6 +533,7 @@
     const themeColorMeta = document.getElementById('themeColorMeta');
     const themeIcons = themeToggle.querySelectorAll('.theme-icon');
     const scrollProgress = document.getElementById('scrollProgress');
+    const formatToolbar = document.getElementById('formatToolbar');
 
     const STORAGE_KEY = 'quickmemo';
     const THEME_KEY = 'quickmemo_theme';
@@ -518,36 +541,122 @@
     const COLOR_KEY = 'quickmemo_color';
     const MODES = ['auto', 'light', 'dark'];
     const LABELS = { auto: '자동', light: '라이트', dark: '다크' };
-
     const SIZES = [8, 9, 10, 11, 12, 13, 14, 15];
     const COLORS = [
+      { key: 'black', name: '검정' },
       { key: 'red',   name: '빨강' },
       { key: 'blue',  name: '파랑' },
       { key: 'green', name: '초록' },
-      { key: 'gray',  name: '회색' },
-      { key: 'black', name: '검정' }
+      { key: 'gray',  name: '회색' }
     ];
     const DEFAULT_SIZE = 13;
     const DEFAULT_COLOR = 'black';
+    const HTML_RE = /<[a-z!\/][\s\S]*?>/i;
+    const ENDS_BR_RE = /<br\s*\/?>\s*$/i;
 
-    // ===== Memo =====
+    // ===== Save =====
     function persistMemo() {
-      try { localStorage.setItem(STORAGE_KEY, memo.value); } catch (_) {}
+      // 빈/ZWSP만 있는 span은 깔끔하게 제거한 복사본으로 저장
+      try {
+        const clone = memo.cloneNode(true);
+        clone.querySelectorAll('span').forEach(span => {
+          const t = span.textContent;
+          if (t === '' || t === '​') {
+            span.remove();
+          } else if (t.startsWith('​')) {
+            // 선행 ZWSP 제거
+            const walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
+            const first = walker.nextNode();
+            if (first && first.textContent.startsWith('​')) {
+              first.textContent = first.textContent.substring(1);
+            }
+          }
+        });
+        localStorage.setItem(STORAGE_KEY, clone.innerHTML);
+      } catch (_) {
+        try { localStorage.setItem(STORAGE_KEY, memo.innerHTML); } catch (_) {}
+      }
     }
-    const saved = localStorage.getItem(STORAGE_KEY) || '';
-    const initial = (saved.length > 0 && !saved.endsWith('\n')) ? saved + '\n' : saved;
-    memo.value = initial;
-    if (initial !== saved) persistMemo();
-    requestAnimationFrame(() => {
-      try { memo.setSelectionRange(memo.value.length, memo.value.length); } catch (_) {}
-      memo.scrollTop = memo.scrollHeight;
-    });
+
+    // 기존 데이터의 hex 색(이전 버전 저장)을 클래스로 마이그레이션
+    const HEX_TO_KEY = {};
+    [
+      ['#e53935','red'], ['rgb(229, 57, 53)','red'],
+      ['#1e88e5','blue'], ['rgb(30, 136, 229)','blue'],
+      ['#43a047','green'], ['rgb(67, 160, 71)','green'],
+      ['#757575','gray'], ['rgb(117, 117, 117)','gray'],
+      ['#1e1b2e','black'], ['rgb(30, 27, 46)','black'],
+      ['#ff6b6b','red'], ['rgb(255, 107, 107)','red'],
+      ['#64b5f6','blue'], ['rgb(100, 181, 246)','blue'],
+      ['#81c784','green'], ['rgb(129, 199, 132)','green'],
+      ['#bdbdbd','gray'], ['rgb(189, 189, 189)','gray'],
+      ['#f3f1ff','black'], ['rgb(243, 241, 255)','black'],
+    ].forEach(([k, v]) => { HEX_TO_KEY[k.toLowerCase()] = v; });
+
+    function migrateInlineColors(root) {
+      root.querySelectorAll('[style*="color"]').forEach(el => {
+        const c = (el.style.color || '').toLowerCase();
+        const key = HEX_TO_KEY[c];
+        if (key) {
+          el.style.color = '';
+          if (!el.getAttribute('style')?.trim()) el.removeAttribute('style');
+          el.classList.add(`mc-${key}`);
+        }
+      });
+      root.querySelectorAll('font[color]').forEach(el => {
+        const c = (el.getAttribute('color') || '').toLowerCase();
+        const key = HEX_TO_KEY[c];
+        const span = document.createElement('span');
+        if (key) span.className = `mc-${key}`;
+        else span.style.color = el.getAttribute('color');
+        while (el.firstChild) span.appendChild(el.firstChild);
+        el.parentNode.replaceChild(span, el);
+      });
+    }
+
+    // ===== Load + auto newline =====
+    (function loadMemo() {
+      const saved = localStorage.getItem(STORAGE_KEY) || '';
+      if (HTML_RE.test(saved)) {
+        memo.innerHTML = saved;
+      } else {
+        memo.textContent = saved;
+      }
+      // 이전 버전의 hex 색을 클래스로 변환 (테마 자동 적응 회복)
+      migrateInlineColors(memo);
+      // 끝에 줄바꿈 자동 추가 (자연스러운 새 줄에서 시작)
+      const html = memo.innerHTML;
+      if (html.length > 0 && !ENDS_BR_RE.test(html)) {
+        memo.appendChild(document.createElement('br'));
+        persistMemo();
+      }
+      // 커서 끝으로
+      requestAnimationFrame(() => {
+        try {
+          const range = document.createRange();
+          range.selectNodeContents(memo);
+          range.collapse(false);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch (_) {}
+        memo.scrollTop = memo.scrollHeight;
+      });
+    })();
+
     memo.addEventListener('input', persistMemo);
     memo.addEventListener('blur', persistMemo);
     window.addEventListener('pagehide', persistMemo);
     window.addEventListener('beforeunload', persistMemo);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') persistMemo();
+    });
+
+    // 붙여넣기는 평문만 받기 (외부 서식 침투 방지)
+    memo.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+      document.execCommand('insertText', false, text);
     });
 
     // ===== Snackbar =====
@@ -559,7 +668,7 @@
       snackTimer = setTimeout(() => snackbar.classList.remove('show'), 2000);
     }
 
-    // ===== Font size & color =====
+    // ===== Size & Color =====
     function getSize() {
       const s = parseInt(localStorage.getItem(SIZE_KEY) || DEFAULT_SIZE, 10);
       return SIZES.includes(s) ? s : DEFAULT_SIZE;
@@ -569,13 +678,160 @@
       return COLORS.some(x => x.key === c) ? c : DEFAULT_COLOR;
     }
 
+    function resolveCssColor(varExpr) {
+      const probe = document.createElement('span');
+      probe.style.color = varExpr;
+      probe.style.display = 'none';
+      document.body.appendChild(probe);
+      const v = getComputedStyle(probe).color;
+      document.body.removeChild(probe);
+      return v;
+    }
+
     function applyMemoStyle() {
       const s = getSize();
       const c = getColor();
       document.documentElement.style.setProperty('--memo-font-size', s + 'pt');
-      document.documentElement.style.setProperty('--memo-color', `var(--memo-color-${c})`);
       sizeLabel.textContent = String(s);
       colorDot.style.background = `var(--memo-color-${c})`;
+    }
+
+    // 텍스트 노드 단위 래핑 (block 경계 안전 - 줄바꿈 안 생김)
+    function wrapTextNodesInRange(range, tagName, className) {
+      const startContainer = range.startContainer;
+      const endContainer = range.endContainer;
+      const startOffset = range.startOffset;
+      const endOffset = range.endOffset;
+      const ancestor = range.commonAncestorContainer;
+      const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
+
+      const textNodes = [];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = walker.nextNode())) {
+        if (range.intersectsNode(n)) textNodes.push(n);
+      }
+
+      textNodes.forEach(node => {
+        let s = 0;
+        let e = node.textContent.length;
+        if (node === startContainer) s = Math.max(s, startOffset);
+        if (node === endContainer) e = Math.min(e, endOffset);
+        if (s >= e) return;
+        const full = node.textContent;
+        const before = full.substring(0, s);
+        const middle = full.substring(s, e);
+        const after = full.substring(e);
+        if (!middle) return;
+
+        const parent = node.parentNode;
+        const wrapper = document.createElement(tagName);
+        if (className) wrapper.className = className;
+        wrapper.textContent = middle;
+
+        if (before) parent.insertBefore(document.createTextNode(before), node);
+        parent.insertBefore(wrapper, node);
+        if (after) parent.insertBefore(document.createTextNode(after), node);
+        parent.removeChild(node);
+      });
+    }
+
+    function isWrappedByTag(range, tagName) {
+      const tag = tagName.toUpperCase();
+      let node = range.startContainer;
+      while (node && node !== memo) {
+        if (node.nodeName === tag) return true;
+        node = node.parentNode;
+      }
+      return false;
+    }
+
+    function unwrapTagInRange(range, tagName) {
+      const tag = tagName.toUpperCase();
+      const ancestor = range.commonAncestorContainer;
+      const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
+      const elements = [];
+      let node = range.startContainer;
+      while (node && node !== memo) {
+        if (node.nodeName === tag) elements.push(node);
+        node = node.parentNode;
+      }
+      if (root.querySelectorAll) {
+        root.querySelectorAll(tagName).forEach(el => {
+          if (range.intersectsNode(el)) elements.push(el);
+        });
+      }
+      Array.from(new Set(elements)).forEach(el => {
+        const parent = el.parentNode;
+        while (el.firstChild) parent.insertBefore(el.firstChild, el);
+        parent.removeChild(el);
+      });
+    }
+
+    function toggleFormatTag(tagName) {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (!memo.contains(range.commonAncestorContainer)) return;
+      if (range.collapsed) return;
+
+      if (isWrappedByTag(range, tagName)) {
+        unwrapTagInRange(range, tagName);
+      } else {
+        wrapTextNodesInRange(range, tagName, null);
+      }
+      persistMemo();
+      updateToolbarState();
+    }
+
+    function applyColorAtSelection(colorKey) {
+      const sel = window.getSelection();
+
+      // 이미 메모 안에 선택이 있으면 그걸 그대로 사용 (포커스 안 건드림 → 선택 보존)
+      if (sel && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        if (memo.contains(range.commonAncestorContainer)) {
+          if (range.collapsed) {
+            // 커서만: ZWSP 앵커 삽입, 다음 타이핑이 이 안으로 들어감
+            const span = document.createElement('span');
+            span.className = `mc-${colorKey}`;
+            const anchor = document.createTextNode('​');
+            span.appendChild(anchor);
+            range.insertNode(span);
+            const nr = document.createRange();
+            nr.setStart(anchor, 1);
+            nr.setEnd(anchor, 1);
+            sel.removeAllRanges();
+            sel.addRange(nr);
+          } else {
+            // 선택영역: 텍스트 노드 단위 래핑
+            wrapTextNodesInRange(range, 'span', `mc-${colorKey}`);
+          }
+          persistMemo();
+          memo.focus();
+          return;
+        }
+      }
+
+      // 메모에 선택 없음 - 끝에 앵커
+      memo.focus();
+      const range = document.createRange();
+      range.selectNodeContents(memo);
+      range.collapse(false);
+      const s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(range);
+      const span = document.createElement('span');
+      span.className = `mc-${colorKey}`;
+      const anchor = document.createTextNode('​');
+      span.appendChild(anchor);
+      range.insertNode(span);
+      const nr = document.createRange();
+      nr.setStart(anchor, 1);
+      nr.setEnd(anchor, 1);
+      s.removeAllRanges();
+      s.addRange(nr);
+      persistMemo();
     }
 
     function buildSizePopover() {
@@ -606,10 +862,12 @@
         sw.className = 'color-swatch';
         sw.style.background = `var(--memo-color-${key})`;
         btn.appendChild(sw);
+        btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           localStorage.setItem(COLOR_KEY, key);
           applyMemoStyle();
+          applyColorAtSelection(key);
           buildColorPopover();
           closePopovers();
         });
@@ -619,7 +877,6 @@
 
     function openPopover(target) {
       closePopovers();
-      // 두 팝오버는 좌상단 시작점 동일. 사이즈는 sizeBtn 아래, 색상은 colorBtn 아래로 살짝 시프트
       const offsetLeft = target === colorPopover ? '78px' : '16px';
       target.style.left = `calc(${offsetLeft} + env(safe-area-inset-left))`;
       target.classList.add('show');
@@ -643,6 +900,75 @@
     });
     document.addEventListener('click', () => closePopovers());
 
+    // ===== Format toolbar (B / I / S) =====
+    let toolbarTimer = null;
+    function isSelectionInMemo() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return false;
+      const node = sel.anchorNode;
+      return node && (memo === node || memo.contains(node));
+    }
+    function positionToolbar(range) {
+      formatToolbar.style.visibility = 'hidden';
+      formatToolbar.classList.add('show');
+      const tw = formatToolbar.offsetWidth;
+      const th = formatToolbar.offsetHeight;
+      formatToolbar.style.visibility = '';
+
+      const rect = range.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.visualViewport?.height || window.innerHeight;
+
+      // 아래쪽 우선 (iOS 네이티브 메뉴는 보통 위쪽에 뜸 → 충돌 회피)
+      let top = rect.bottom + 10;
+      if (top + th > vh - 20) {
+        top = rect.top - th - 10;
+        if (top < 20) top = 20;
+      }
+      let left = rect.left + rect.width / 2 - tw / 2;
+      left = Math.max(8, Math.min(vw - tw - 8, left));
+
+      formatToolbar.style.left = `${left}px`;
+      formatToolbar.style.top = `${top}px`;
+    }
+    function updateToolbarState() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      if (!memo.contains(range.commonAncestorContainer)) return;
+      [['bold','b'], ['italic','i'], ['underline','u']].forEach(([cmd, tag]) => {
+        const btn = formatToolbar.querySelector(`[data-cmd="${cmd}"]`);
+        if (!btn) return;
+        btn.classList.toggle('active', isWrappedByTag(range, tag));
+      });
+    }
+    function showFormatToolbar() {
+      clearTimeout(toolbarTimer);
+      toolbarTimer = setTimeout(() => {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || sel.isCollapsed || !isSelectionInMemo()) {
+          formatToolbar.classList.remove('show');
+          return;
+        }
+        const range = sel.getRangeAt(0);
+        positionToolbar(range);
+        updateToolbarState();
+        formatToolbar.classList.add('show');
+      }, 120);
+    }
+    document.addEventListener('selectionchange', showFormatToolbar);
+
+    formatToolbar.addEventListener('mousedown', (e) => e.preventDefault());
+    formatToolbar.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => e.preventDefault());
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const tag = { bold: 'b', italic: 'i', underline: 'u' }[btn.dataset.cmd];
+        if (tag) toggleFormatTag(tag);
+      });
+    });
+
     // ===== Theme =====
     function getMode() { return localStorage.getItem(THEME_KEY) || 'auto'; }
     function isCurrentlyDark() {
@@ -656,7 +982,6 @@
       const root = document.documentElement;
       if (mode === 'auto') root.removeAttribute('data-theme');
       else root.setAttribute('data-theme', mode);
-
       themeIcons.forEach(svg => {
         svg.classList.toggle('active', svg.dataset.mode === mode);
       });
@@ -678,14 +1003,14 @@
       if (e.target === modalBackdrop) modalBackdrop.classList.remove('show');
     });
     confirmBtn.addEventListener('click', () => {
-      memo.value = '';
+      memo.innerHTML = '';
       localStorage.setItem(STORAGE_KEY, '');
       modalBackdrop.classList.remove('show');
       showSnackbar('메모를 비웠어요');
       memo.focus();
     });
 
-    // ===== Time-based tint =====
+    // ===== Time tint =====
     function applyTimeTint() {
       const hour = new Date().getHours();
       const dark = isCurrentlyDark();
