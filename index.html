@@ -1266,33 +1266,94 @@
       });
     }
 
-    function isWrappedByTag(range, tagName) {
-      const tag = tagName.toUpperCase();
-      let node = range.startContainer;
-      while (node && node !== memo) {
-        if (node.nodeName === tag) return true;
-        node = node.parentNode;
+    // 어떤 노드의 조상 체인에 해당 태그가 있는지
+    function hasAncestorTag(startNode, tag) {
+      let n = startNode;
+      while (n && n !== memo) {
+        if (n.nodeName === tag) return true;
+        n = n.parentNode;
       }
       return false;
     }
 
-    function unwrapTagInRange(range, tagName) {
-      const tag = tagName.toUpperCase();
+    // 선택영역과 실제로 교차하는 텍스트 노드만 수집
+    // (range.endContainer가 텍스트 노드의 0 오프셋이거나
+    //  startContainer가 노드 끝 오프셋인 boundary 케이스를 제외)
+    function collectSelectedTextNodes(range) {
       const ancestor = range.commonAncestorContainer;
       const root = ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentNode : ancestor;
-      const elements = [];
-      let node = range.startContainer;
-      while (node && node !== memo) {
-        if (node.nodeName === tag) elements.push(node);
-        node = node.parentNode;
+      const out = [];
+      if (!root || !root.nodeType) return out;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let n;
+      while ((n = walker.nextNode())) {
+        if (!range.intersectsNode(n)) continue;
+        let s = 0, e = n.textContent.length;
+        if (n === range.startContainer) s = Math.max(s, range.startOffset);
+        if (n === range.endContainer) e = Math.min(e, range.endOffset);
+        if (s >= e) continue; // boundary 위치는 제외
+        const slice = n.textContent.slice(s, e);
+        if (!slice || slice === '​') continue;
+        out.push(n);
       }
-      if (root.querySelectorAll) {
-        root.querySelectorAll(tagName).forEach(el => {
-          if (range.intersectsNode(el)) elements.push(el);
-        });
+      return out;
+    }
+
+    function isWrappedByTag(range, tagName) {
+      const tag = tagName.toUpperCase();
+
+      // 1) commonAncestor 또는 그 상위 체인에 태그가 있으면 전체가 감싸진 상태
+      const ca = range.commonAncestorContainer;
+      const caEl = ca.nodeType === Node.TEXT_NODE ? ca.parentNode : ca;
+      if (hasAncestorTag(caEl, tag)) return true;
+
+      // 2) 선택 안에 있는 모든 실제 텍스트 노드가 해당 태그 안에 있는지 검사
+      //    (boundary 위치의 startContainer/endContainer는 무시되어
+      //     "<i>...</i> 뒤 cursor" 같은 케이스에서도 정확히 동작)
+      if (!range.collapsed) {
+        const nodes = collectSelectedTextNodes(range);
+        if (nodes.length === 0) {
+          // 실효 텍스트가 없으면 양 끝 컨테이너의 조상으로 보조 판정
+          return hasAncestorTag(range.startContainer, tag)
+              || hasAncestorTag(range.endContainer, tag);
+        }
+        return nodes.every(n => hasAncestorTag(n.parentNode, tag));
       }
-      Array.from(new Set(elements)).forEach(el => {
+
+      // collapsed: startContainer 기준
+      return hasAncestorTag(range.startContainer, tag);
+    }
+
+    function unwrapTagInRange(range, tagName) {
+      const tag = tagName.toUpperCase();
+      const elements = new Set();
+
+      // 1) start/end/commonAncestor 의 조상 체인에서 해당 태그를 모두 수집
+      [range.startContainer, range.endContainer, range.commonAncestorContainer].forEach(c => {
+        let n = c && c.nodeType === Node.TEXT_NODE ? c.parentNode : c;
+        while (n && n !== memo) {
+          if (n.nodeName === tag) elements.add(n);
+          n = n.parentNode;
+        }
+      });
+
+      // 2) 실제로 선택된 텍스트 노드의 조상 체인에 있는 태그도 수집
+      collectSelectedTextNodes(range).forEach(tn => {
+        let n = tn.parentNode;
+        while (n && n !== memo) {
+          if (n.nodeName === tag) elements.add(n);
+          n = n.parentNode;
+        }
+      });
+
+      // 3) memo 전체에서 range와 교차하는 해당 태그 요소
+      memo.querySelectorAll(tagName).forEach(el => {
+        try { if (range.intersectsNode(el)) elements.add(el); } catch (_) {}
+      });
+
+      elements.forEach(el => {
         const parent = el.parentNode;
+        if (!parent) return;
         while (el.firstChild) parent.insertBefore(el.firstChild, el);
         parent.removeChild(el);
       });
