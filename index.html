@@ -137,7 +137,7 @@
       line-height: 1.85;
       letter-spacing: -0.01em;
       font-family: inherit;
-      text-align: center;
+      text-align: left;
       padding: calc(72px + env(safe-area-inset-top)) 28px
         calc(40px + env(safe-area-inset-bottom));
       -webkit-user-select: text;
@@ -168,12 +168,47 @@
       animation: fadeIn 0.6s ease-out 0.05s both;
     }
 
-    .memo::-webkit-scrollbar { width: 2px; }
+    .memo::-webkit-scrollbar { width: 0; }
     .memo::-webkit-scrollbar-track { background: transparent; }
-    .memo::-webkit-scrollbar-thumb {
+    .memo::-webkit-scrollbar-thumb { background: transparent; }
+
+    /* 종이결 오버레이 */
+    .paper-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.18;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 220px 220px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .paper-grain {
+        opacity: 0.10;
+        mix-blend-mode: screen;
+      }
+    }
+    :root[data-theme="dark"] .paper-grain {
+      opacity: 0.10;
+      mix-blend-mode: screen;
+    }
+
+    /* 얇은 스크롤 진행 인디케이터 */
+    .scroll-progress {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 2px;
+      height: 0;
       background: var(--accent);
       border-radius: 1px;
+      z-index: 4;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
     }
+    .scroll-progress.visible { opacity: 0.4; }
 
     @keyframes caretPulse {
       0%, 100% { caret-color: var(--accent); }
@@ -388,6 +423,9 @@
   </style>
 </head>
 <body>
+  <div class="paper-grain" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
   <textarea
     class="memo"
     id="memo"
@@ -472,6 +510,7 @@
     const confirmBtn = document.getElementById('confirmBtn');
     const themeColorMeta = document.getElementById('themeColorMeta');
     const themeIcons = themeToggle.querySelectorAll('.theme-icon');
+    const scrollProgress = document.getElementById('scrollProgress');
 
     const STORAGE_KEY = 'quickmemo';
     const THEME_KEY = 'quickmemo_theme';
@@ -667,6 +706,27 @@
       document.documentElement.style.setProperty('--surface', bg);
       themeColorMeta.setAttribute('content', bg);
     }
+
+    // ===== Scroll progress =====
+    function updateScrollProgress() {
+      const max = memo.scrollHeight - memo.clientHeight;
+      if (max <= 2) {
+        scrollProgress.classList.remove('visible');
+        return;
+      }
+      const ratio = Math.max(0, Math.min(1, memo.scrollTop / max));
+      const viewportH = window.innerHeight;
+      const visibleRatio = memo.clientHeight / memo.scrollHeight;
+      const thumbH = Math.max(40, viewportH * visibleRatio);
+      const thumbTop = (viewportH - thumbH) * ratio;
+      scrollProgress.style.height = thumbH + 'px';
+      scrollProgress.style.top = thumbTop + 'px';
+      scrollProgress.classList.add('visible');
+    }
+    memo.addEventListener('scroll', updateScrollProgress, { passive: true });
+    memo.addEventListener('input', updateScrollProgress);
+    window.addEventListener('resize', updateScrollProgress);
+    requestAnimationFrame(updateScrollProgress);
 
     // ===== Init =====
     applyTheme();
