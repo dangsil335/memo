@@ -40,8 +40,6 @@
       --memo-color-green: #43A047;
       --memo-color-gray:  #757575;
       --memo-color-black: #1E1B2E;
-
-      --memo-font-size: 13pt;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -116,7 +114,7 @@
       outline: none;
       background: transparent;
       color: var(--text-primary);
-      font-size: var(--memo-font-size);
+      font-size: 13pt;
       font-weight: 420;
       line-height: 1.85;
       letter-spacing: -0.01em;
@@ -168,6 +166,16 @@
     .memo .mc-green { color: var(--memo-color-green); }
     .memo .mc-gray  { color: var(--memo-color-gray); }
     .memo .mc-black { color: var(--memo-color-black); }
+
+    /* 메모 사이즈 클래스 */
+    .memo .ms-8  { font-size: 8pt;  }
+    .memo .ms-9  { font-size: 9pt;  }
+    .memo .ms-10 { font-size: 10pt; }
+    .memo .ms-11 { font-size: 11pt; }
+    .memo .ms-12 { font-size: 12pt; }
+    .memo .ms-13 { font-size: 13pt; }
+    .memo .ms-14 { font-size: 14pt; }
+    .memo .ms-15 { font-size: 15pt; }
 
     /* 서식 태그 - 기본 스타일 명시 (브라우저별 차이 방지) */
     .memo b, .memo strong { font-weight: 700; }
@@ -363,6 +371,231 @@
     .fmt-i { font-style: italic; font-weight: 600; }
     .fmt-u { text-decoration: underline; font-weight: 600; }
 
+    /* 우하단 페이지 목록 버튼 */
+    .page-list-btn {
+      position: fixed;
+      right: calc(16px + env(safe-area-inset-right));
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      width: 56px;
+      height: 36px;
+      border: 1px solid var(--pill-outline-border);
+      border-radius: 18px;
+      background: var(--pill-outline-bg);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: var(--shadow-pill-outline);
+      transition: transform 0.12s ease;
+      padding: 0;
+      font-family: inherit;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+    }
+    .page-list-btn:active { transform: scale(0.94); }
+    .page-list-btn svg { width: 20px; height: 20px; }
+
+    /* 페이지 목록 모달 (바텀시트 스타일) */
+    .pages-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.42);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 40;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      animation: fadeIn 0.2s ease-out;
+    }
+    .pages-modal.show { display: flex; }
+
+    .pages-modal-content {
+      background: var(--surface);
+      width: 100%;
+      max-width: 500px;
+      max-height: 80%;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.24);
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .pages-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 22px 14px 24px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .pages-modal-header h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .pages-modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: background 0.15s ease;
+    }
+    .pages-modal-close:active { background: var(--accent-soft); }
+    .pages-modal-close svg { width: 18px; height: 18px; }
+
+    .pages-list {
+      overflow-y: auto;
+      padding: 18px 14px 28px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: 10px;
+      row-gap: 18px;
+      align-content: start;
+    }
+    .pages-list::-webkit-scrollbar { width: 4px; }
+    .pages-list::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 2px; }
+
+    /* 미니 페이지 카드 (3열 그리드) */
+    .page-card {
+      aspect-ratio: 3 / 4;
+      background: var(--bg);
+      border: 1px solid var(--divider);
+      border-radius: 12px;
+      padding: 12px 10px 8px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.15s ease, transform 0.12s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .page-card:active { transform: scale(0.96); }
+    .page-card.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 4px 14px rgba(107, 77, 255, 0.22);
+    }
+    .page-card.deleting {
+      pointer-events: none;
+      animation: cardDelete 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes cardDelete {
+      0%   { opacity: 1; transform: scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: scale(0.65) translateY(-8px); filter: blur(2px); }
+    }
+    .page-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .page-card-preview {
+      flex: 1;
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      font-weight: 450;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 7;
+      -webkit-box-orient: vertical;
+    }
+    .page-card-preview.empty {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    /* 미리보기 안에서도 색·서식·사이즈 표시 */
+    .page-card-preview b, .page-card-preview strong { font-weight: 700; }
+    .page-card-preview i, .page-card-preview em { font-style: italic; }
+    .page-card-preview u, .page-card-preview ins { text-decoration: underline; }
+
+    .page-card-preview .mc-red   { color: var(--memo-color-red); }
+    .page-card-preview .mc-blue  { color: var(--memo-color-blue); }
+    .page-card-preview .mc-green { color: var(--memo-color-green); }
+    .page-card-preview .mc-gray  { color: var(--memo-color-gray); }
+    .page-card-preview .mc-black { color: var(--memo-color-black); }
+
+    /* 사이즈는 카드에 맞게 축소 (실제는 8~15pt, 프리뷰는 6.5~12.5px) */
+    .page-card-preview .ms-8  { font-size: 6.5px; }
+    .page-card-preview .ms-9  { font-size: 7.5px; }
+    .page-card-preview .ms-10 { font-size: 8px; }
+    .page-card-preview .ms-11 { font-size: 9px; }
+    .page-card-preview .ms-12 { font-size: 9.5px; }
+    .page-card-preview .ms-13 { font-size: 10.5px; }
+    .page-card-preview .ms-14 { font-size: 11.5px; }
+    .page-card-preview .ms-15 { font-size: 12.5px; }
+    .page-card-meta {
+      font-size: 9.5px;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+      margin-top: 6px;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .page-card-delete {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border: none;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      margin: 0;
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      z-index: 1;
+      transition: background 0.15s ease;
+    }
+    .page-card-delete:active { background: var(--divider); }
+    .page-card-delete svg { width: 11px; height: 11px; }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .page-card-delete {
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+    :root[data-theme="dark"] .page-card-delete {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .pages-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
     .snackbar {
       position: fixed;
       left: 50%;
@@ -391,7 +624,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 30;
+      z-index: 60;
       -webkit-backdrop-filter: blur(6px);
       backdrop-filter: blur(6px);
       animation: fadeIn 0.2s ease-out;
@@ -467,6 +700,13 @@
 
   <!-- 우상단 -->
   <div class="top-actions-right">
+    <button class="pill outline" id="saveBtn" aria-label="새 페이지">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+        <line x1="12" y1="6" x2="12" y2="18" />
+        <line x1="6" y1="12" x2="18" y2="12" />
+      </svg>
+    </button>
+
     <button class="pill outline" id="themeToggle" aria-label="테마 전환">
       <svg class="theme-icon" data-mode="auto" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M12,2 C6.48,2 2,6.48 2,12 C2,17.52 6.48,22 12,22 C17.52,22 22,17.52 22,12 C22,6.48 17.52,2 12,2 Z M12,4 C16.42,4 20,7.58 20,12 C20,16.42 16.42,20 12,20 L12,4 Z" />
@@ -503,15 +743,38 @@
     <button data-cmd="underline" aria-label="밑줄"><span class="fmt-u">U</span></button>
   </div>
 
+  <!-- 우하단 페이지 목록 버튼 -->
+  <button class="page-list-btn" id="pageListBtn" aria-label="저장된 페이지">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16 4H4C2.9 4 2 4.9 2 6v10h2V6h12V4zm3 4H8c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H8V10h11v10z" />
+    </svg>
+  </button>
+
+  <!-- 페이지 목록 모달 -->
+  <div class="pages-modal" id="pagesModal">
+    <div class="pages-modal-content">
+      <div class="pages-modal-header">
+        <h3>저장된 페이지</h3>
+        <button class="pages-modal-close" id="pagesModalClose" aria-label="닫기">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+          </svg>
+        </button>
+      </div>
+      <div class="pages-list" id="pagesList"></div>
+    </div>
+  </div>
+
   <div class="snackbar" id="snackbar"></div>
 
+  <!-- 공용 확인 모달 (메모 비우기 / 페이지 삭제 등에 재사용) -->
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal" role="dialog" aria-modal="true">
-      <h3>메모를 지울까요?</h3>
-      <p>작성된 모든 내용이 사라집니다.</p>
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
       <div class="modal-actions">
         <button id="cancelBtn">취소</button>
-        <button class="primary" id="confirmBtn">지우기</button>
+        <button class="primary" id="confirmBtn">확인</button>
       </div>
     </div>
   </div>
@@ -528,14 +791,23 @@
     const colorPopover = document.getElementById('colorPopover');
     const snackbar = document.getElementById('snackbar');
     const modalBackdrop = document.getElementById('modalBackdrop');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
     const cancelBtn = document.getElementById('cancelBtn');
     const confirmBtn = document.getElementById('confirmBtn');
     const themeColorMeta = document.getElementById('themeColorMeta');
     const themeIcons = themeToggle.querySelectorAll('.theme-icon');
     const scrollProgress = document.getElementById('scrollProgress');
     const formatToolbar = document.getElementById('formatToolbar');
+    const saveBtn = document.getElementById('saveBtn');
+    const pageListBtn = document.getElementById('pageListBtn');
+    const pagesModal = document.getElementById('pagesModal');
+    const pagesModalClose = document.getElementById('pagesModalClose');
+    const pagesListEl = document.getElementById('pagesList');
 
     const STORAGE_KEY = 'quickmemo';
+    const PAGES_KEY = 'quickmemo_pages';
+    const CURRENT_PAGE_KEY = 'quickmemo_current_page';
     const THEME_KEY = 'quickmemo_theme';
     const SIZE_KEY = 'quickmemo_size';
     const COLOR_KEY = 'quickmemo_color';
@@ -554,9 +826,50 @@
     const HTML_RE = /<[a-z!\/][\s\S]*?>/i;
     const ENDS_BR_RE = /<br\s*\/?>\s*$/i;
 
-    // ===== Save =====
+    // ===== Page data model =====
+    let pages = [];
+    let currentPageId = null;
+
+    function newPageId() {
+      return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    }
+    function getCurrentPage() {
+      return pages.find(p => p.id === currentPageId) || null;
+    }
+    function persistPages() {
+      try { localStorage.setItem(PAGES_KEY, JSON.stringify(pages)); } catch (_) {}
+    }
+    function sortedPages() {
+      return [...pages].sort((a, b) => b.updatedAt - a.updatedAt);
+    }
+
+    function loadPages() {
+      try {
+        const raw = localStorage.getItem(PAGES_KEY);
+        if (raw) pages = JSON.parse(raw) || [];
+      } catch (_) { pages = []; }
+
+      // 기존 단일 메모 데이터 마이그레이션
+      if (pages.length === 0) {
+        const old = localStorage.getItem(STORAGE_KEY) || '';
+        const initial = old
+          ? [{ id: newPageId(), content: old, updatedAt: Date.now() }]
+          : [{ id: newPageId(), content: '', updatedAt: Date.now() }];
+        pages = initial;
+        persistPages();
+      }
+
+      currentPageId = localStorage.getItem(CURRENT_PAGE_KEY);
+      if (!currentPageId || !pages.find(p => p.id === currentPageId)) {
+        currentPageId = sortedPages()[0].id;
+        localStorage.setItem(CURRENT_PAGE_KEY, currentPageId);
+      }
+    }
+
+    // ===== Save current page content =====
     function persistMemo() {
-      // 빈/ZWSP만 있는 span은 깔끔하게 제거한 복사본으로 저장
+      const page = getCurrentPage();
+      if (!page) return;
       try {
         const clone = memo.cloneNode(true);
         clone.querySelectorAll('span').forEach(span => {
@@ -564,7 +877,6 @@
           if (t === '' || t === '​') {
             span.remove();
           } else if (t.startsWith('​')) {
-            // 선행 ZWSP 제거
             const walker = document.createTreeWalker(span, NodeFilter.SHOW_TEXT);
             const first = walker.nextNode();
             if (first && first.textContent.startsWith('​')) {
@@ -572,10 +884,43 @@
             }
           }
         });
-        localStorage.setItem(STORAGE_KEY, clone.innerHTML);
+        page.content = clone.innerHTML;
       } catch (_) {
-        try { localStorage.setItem(STORAGE_KEY, memo.innerHTML); } catch (_) {}
+        page.content = memo.innerHTML;
       }
+      page.updatedAt = Date.now();
+      persistPages();
+    }
+
+    function switchToPage(pageId) {
+      if (pageId === currentPageId) return;
+      persistMemo();
+      currentPageId = pageId;
+      localStorage.setItem(CURRENT_PAGE_KEY, pageId);
+      loadCurrentPageIntoEditor();
+    }
+
+    function createNewPage() {
+      persistMemo();
+      const newP = { id: newPageId(), content: '', updatedAt: Date.now() };
+      pages.push(newP);
+      currentPageId = newP.id;
+      localStorage.setItem(CURRENT_PAGE_KEY, newP.id);
+      persistPages();
+      loadCurrentPageIntoEditor();
+    }
+
+    function deletePage(pageId) {
+      pages = pages.filter(p => p.id !== pageId);
+      if (currentPageId === pageId) {
+        if (pages.length === 0) {
+          pages.push({ id: newPageId(), content: '', updatedAt: Date.now() });
+        }
+        currentPageId = sortedPages()[0].id;
+        localStorage.setItem(CURRENT_PAGE_KEY, currentPageId);
+        loadCurrentPageIntoEditor();
+      }
+      persistPages();
     }
 
     // 기존 데이터의 hex 색(이전 버전 저장)을 클래스로 마이그레이션
@@ -614,9 +959,10 @@
       });
     }
 
-    // ===== Load + auto newline =====
-    (function loadMemo() {
-      const saved = localStorage.getItem(STORAGE_KEY) || '';
+    // ===== Load current page into editor =====
+    function loadCurrentPageIntoEditor() {
+      const p = getCurrentPage();
+      const saved = p ? (p.content || '') : '';
       if (HTML_RE.test(saved)) {
         memo.innerHTML = saved;
       } else {
@@ -624,7 +970,7 @@
       }
       // 이전 버전의 hex 색을 클래스로 변환 (테마 자동 적응 회복)
       migrateInlineColors(memo);
-      // 끝에 줄바꿈 자동 추가 (자연스러운 새 줄에서 시작)
+      // 끝에 줄바꿈 자동 추가
       const html = memo.innerHTML;
       if (html.length > 0 && !ENDS_BR_RE.test(html)) {
         memo.appendChild(document.createElement('br'));
@@ -641,8 +987,9 @@
           sel.addRange(range);
         } catch (_) {}
         memo.scrollTop = memo.scrollHeight;
+        if (typeof updateScrollProgress === 'function') updateScrollProgress();
       });
-    })();
+    }
 
     memo.addEventListener('input', persistMemo);
     memo.addEventListener('blur', persistMemo);
@@ -657,6 +1004,84 @@
       e.preventDefault();
       const text = (e.clipboardData || window.clipboardData).getData('text/plain');
       document.execCommand('insertText', false, text);
+    });
+
+    // 커서의 조상 중 prefix(`mc-` or `ms-`)로 시작하는 클래스 찾기
+    function findAncestorClass(node, prefix) {
+      while (node && node !== memo) {
+        if (node.classList) {
+          for (const c of node.classList) {
+            if (c.startsWith(prefix)) return c.substring(prefix.length);
+          }
+        }
+        node = node.parentNode;
+      }
+      return null;
+    }
+
+    // 입력 직전 픽커 값으로 강제 래핑
+    // - 선택영역 있음: 항상 래핑 (기존 색 덮어쓰기)
+    // - 커서만 있고 컨텍스트가 픽커 값과 다름: 래핑 (커서 옮긴 뒤 타이핑 케이스 보정)
+    // - 컨텍스트가 이미 일치: 그대로 두기 (정상 타이핑)
+    function preempStyledInsertion() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return false;
+      const range = sel.getRangeAt(0);
+      if (!memo.contains(range.commonAncestorContainer)) return false;
+
+      const wantColor = (localStorage.getItem(COLOR_KEY) || DEFAULT_COLOR);
+      const wantSize = parseInt(localStorage.getItem(SIZE_KEY) || String(DEFAULT_SIZE), 10);
+
+      if (range.collapsed) {
+        // 커서만: 컨텍스트가 이미 픽커와 일치하면 개입 X
+        const currentColor = findAncestorClass(range.startContainer, 'mc-') || DEFAULT_COLOR;
+        const currentSizeStr = findAncestorClass(range.startContainer, 'ms-');
+        const currentSize = currentSizeStr ? parseInt(currentSizeStr, 10) : DEFAULT_SIZE;
+        if (currentColor === wantColor && currentSize === wantSize) {
+          return false;
+        }
+      }
+
+      range.deleteContents();
+
+      const wrapper = document.createElement('span');
+      const classes = [`mc-${wantColor}`];
+      if (wantSize !== DEFAULT_SIZE) classes.push(`ms-${wantSize}`);
+      wrapper.className = classes.join(' ');
+
+      const anchor = document.createTextNode('​'); // ZWSP
+      wrapper.appendChild(anchor);
+      range.insertNode(wrapper);
+
+      const newRange = document.createRange();
+      newRange.setStart(anchor, 1);
+      newRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+      return true;
+    }
+
+    // 한글 IME: 선택영역 위에서 조합 시작 시점에 미리 래핑
+    memo.addEventListener('compositionstart', () => {
+      preempStyledInsertion();
+    });
+
+    // 영어/직접 입력: insertText 시점에 가로채서 래핑 후 직접 삽입
+    memo.addEventListener('beforeinput', (e) => {
+      if (e.inputType !== 'insertText' || !e.data) return;
+      if (!preempStyledInsertion()) return;
+      e.preventDefault();
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+      const range = sel.getRangeAt(0);
+      const textNode = document.createTextNode(e.data);
+      range.insertNode(textNode);
+      const nr = document.createRange();
+      nr.setStart(textNode, textNode.length);
+      nr.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(nr);
+      persistMemo();
     });
 
     // ===== Snackbar =====
@@ -689,11 +1114,116 @@
     }
 
     function applyMemoStyle() {
-      const s = getSize();
-      const c = getColor();
-      document.documentElement.style.setProperty('--memo-font-size', s + 'pt');
-      sizeLabel.textContent = String(s);
-      colorDot.style.background = `var(--memo-color-${c})`;
+      // 사이즈/색 알약은 "최근 선택한 값"을 표시만 함 (전역 적용 안 함)
+      sizeLabel.textContent = String(getSize());
+      colorDot.style.background = `var(--memo-color-${getColor()})`;
+    }
+
+    function applySizeAtSelection(sizeNum) {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        if (memo.contains(range.commonAncestorContainer)) {
+          if (range.collapsed) {
+            const span = document.createElement('span');
+            span.className = `ms-${sizeNum}`;
+            const anchor = document.createTextNode('​');
+            span.appendChild(anchor);
+            range.insertNode(span);
+            const nr = document.createRange();
+            nr.setStart(anchor, 1);
+            nr.setEnd(anchor, 1);
+            sel.removeAllRanges();
+            sel.addRange(nr);
+          } else {
+            withPreservedSelection(() => {
+              wrapTextNodesInRange(range, 'span', `ms-${sizeNum}`);
+            });
+          }
+          persistMemo();
+          memo.focus();
+          return;
+        }
+      }
+      // 메모에 선택 없음 - 끝에 앵커
+      memo.focus();
+      const range = document.createRange();
+      range.selectNodeContents(memo);
+      range.collapse(false);
+      const s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(range);
+      const span = document.createElement('span');
+      span.className = `ms-${sizeNum}`;
+      const anchor = document.createTextNode('​');
+      span.appendChild(anchor);
+      range.insertNode(span);
+      const nr = document.createRange();
+      nr.setStart(anchor, 1);
+      nr.setEnd(anchor, 1);
+      s.removeAllRanges();
+      s.addRange(nr);
+      persistMemo();
+    }
+
+    // 선택 영역을 "메모 루트 기준 문자 오프셋"으로 저장 (DOM 변경에 견디는 좌표)
+    function getCharOffset(root, container, offset) {
+      try {
+        const r = document.createRange();
+        r.setStart(root, 0);
+        r.setEnd(container, offset);
+        return r.toString().length;
+      } catch (_) {
+        return -1;
+      }
+    }
+    function restoreSelectionFromOffsets(root, startOff, endOff) {
+      if (startOff < 0 || endOff < 0) return;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let charCount = 0;
+      let startNode = null, startNodeOff = 0;
+      let endNode = null, endNodeOff = 0;
+      let node;
+      while ((node = walker.nextNode())) {
+        const len = node.textContent.length;
+        if (startNode === null && startOff <= charCount + len) {
+          startNode = node;
+          startNodeOff = startOff - charCount;
+        }
+        if (endOff <= charCount + len) {
+          endNode = node;
+          endNodeOff = endOff - charCount;
+          break;
+        }
+        charCount += len;
+      }
+      if (!startNode) return;
+      if (!endNode) {
+        endNode = startNode;
+        endNodeOff = startNode.textContent.length;
+      }
+      try {
+        const r = document.createRange();
+        r.setStart(startNode, startNodeOff);
+        r.setEnd(endNode, endNodeOff);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+      } catch (_) {}
+    }
+    // 액션 실행 전후 선택영역 보존
+    function withPreservedSelection(action) {
+      const sel = window.getSelection();
+      let startOff = -1, endOff = -1;
+      if (sel && sel.rangeCount > 0) {
+        const r = sel.getRangeAt(0);
+        if (memo.contains(r.commonAncestorContainer)) {
+          startOff = getCharOffset(memo, r.startContainer, r.startOffset);
+          endOff = getCharOffset(memo, r.endContainer, r.endOffset);
+        }
+      }
+      action();
+      restoreSelectionFromOffsets(memo, startOff, endOff);
     }
 
     // 텍스트 노드 단위 래핑 (block 경계 안전 - 줄바꿈 안 생김)
@@ -775,11 +1305,13 @@
       if (!memo.contains(range.commonAncestorContainer)) return;
       if (range.collapsed) return;
 
-      if (isWrappedByTag(range, tagName)) {
-        unwrapTagInRange(range, tagName);
-      } else {
-        wrapTextNodesInRange(range, tagName, null);
-      }
+      withPreservedSelection(() => {
+        if (isWrappedByTag(range, tagName)) {
+          unwrapTagInRange(range, tagName);
+        } else {
+          wrapTextNodesInRange(range, tagName, null);
+        }
+      });
       persistMemo();
       updateToolbarState();
     }
@@ -804,8 +1336,10 @@
             sel.removeAllRanges();
             sel.addRange(nr);
           } else {
-            // 선택영역: 텍스트 노드 단위 래핑
-            wrapTextNodesInRange(range, 'span', `mc-${colorKey}`);
+            // 선택영역: 텍스트 노드 단위 래핑 + 선택 영역 보존
+            withPreservedSelection(() => {
+              wrapTextNodesInRange(range, 'span', `mc-${colorKey}`);
+            });
           }
           persistMemo();
           memo.focus();
@@ -841,10 +1375,12 @@
         const btn = document.createElement('button');
         btn.className = 'popover-item' + (s === current ? ' selected' : '');
         btn.textContent = s;
+        btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           localStorage.setItem(SIZE_KEY, String(s));
           applyMemoStyle();
+          applySizeAtSelection(s);
           buildSizePopover();
           closePopovers();
         });
@@ -996,18 +1532,214 @@
       showSnackbar(`${LABELS[next]} 모드`);
     });
 
-    // ===== Clear =====
-    clearBtn.addEventListener('click', () => modalBackdrop.classList.add('show'));
-    cancelBtn.addEventListener('click', () => modalBackdrop.classList.remove('show'));
-    modalBackdrop.addEventListener('click', (e) => {
-      if (e.target === modalBackdrop) modalBackdrop.classList.remove('show');
-    });
-    confirmBtn.addEventListener('click', () => {
-      memo.innerHTML = '';
-      localStorage.setItem(STORAGE_KEY, '');
+    // ===== 공용 확인 모달 =====
+    let pendingConfirm = null;
+    function showConfirm({ title, message, confirmText, onConfirm }) {
+      modalTitle.textContent = title || '확인';
+      modalMessage.textContent = message || '';
+      confirmBtn.textContent = confirmText || '확인';
+      pendingConfirm = onConfirm || null;
+      modalBackdrop.classList.add('show');
+    }
+    function hideConfirm() {
+      pendingConfirm = null;
       modalBackdrop.classList.remove('show');
-      showSnackbar('메모를 비웠어요');
+    }
+    confirmBtn.addEventListener('click', () => {
+      const fn = pendingConfirm;
+      hideConfirm();
+      if (fn) fn();
+    });
+    cancelBtn.addEventListener('click', hideConfirm);
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) hideConfirm();
+    });
+
+    // ===== Clear (current page) =====
+    clearBtn.addEventListener('click', () => {
+      showConfirm({
+        title: '메모를 지울까요?',
+        message: '현재 페이지의 내용이 모두 사라집니다.',
+        confirmText: '지우기',
+        onConfirm: () => {
+          memo.innerHTML = '';
+          persistMemo();
+          showSnackbar('메모를 비웠어요');
+          memo.focus();
+        }
+      });
+    });
+
+    // ===== Save (= 새 페이지로 넘기기) =====
+    saveBtn.addEventListener('click', () => {
+      createNewPage();
+      showSnackbar('새 페이지');
       memo.focus();
+    });
+
+    // ===== Page list modal =====
+    // 미리보기용 HTML 반환 (서식 보존). 내용이 없으면 null.
+    function getPagePreviewHtml(content) {
+      if (!content) return null;
+      const tmp = document.createElement('div');
+      tmp.innerHTML = content;
+      const text = (tmp.textContent || '').replace(/​/g, '').trim();
+      if (!text) return null;
+      return content;
+    }
+    function relativeTime(ts) {
+      const diff = Date.now() - ts;
+      if (diff < 60_000) return '방금 전';
+      if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}분 전`;
+      if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}시간 전`;
+      const days = Math.floor(diff / 86_400_000);
+      if (days === 1) return '어제';
+      if (days < 7) return `${days}일 전`;
+      const d = new Date(ts);
+      return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+    }
+    // FLIP: 카드 위치 변화 + 모달 높이 변화 모두 부드럽게
+    function flipLayoutChange(action) {
+      const modalContent = pagesModal.querySelector('.pages-modal-content');
+
+      // 1) 모달 높이 잠금 + 카드 옛 위치 기록
+      const oldModalHeight = modalContent ? modalContent.offsetHeight : 0;
+      if (modalContent) {
+        modalContent.style.height = oldModalHeight + 'px';
+      }
+
+      const oldCards = Array.from(pagesListEl.querySelectorAll('[data-page-id]'));
+      const positions = new Map();
+      oldCards.forEach(c => {
+        positions.set(c.dataset.pageId, c.getBoundingClientRect());
+      });
+
+      // 2) 실제 데이터/DOM 변경
+      action();
+
+      // 3) 새 자연 높이 측정 (잠시 잠금 해제 → 측정 → 다시 잠금)
+      let newModalHeight = oldModalHeight;
+      if (modalContent) {
+        modalContent.style.height = '';
+        newModalHeight = modalContent.offsetHeight;
+        modalContent.style.height = oldModalHeight + 'px';
+        void modalContent.offsetHeight;
+      }
+
+      // 4) 모달 높이 트랜지션
+      if (modalContent) {
+        if (Math.abs(oldModalHeight - newModalHeight) > 1) {
+          requestAnimationFrame(() => {
+            modalContent.style.transition = 'height 0.42s cubic-bezier(0.16, 1, 0.3, 1)';
+            modalContent.style.height = newModalHeight + 'px';
+            setTimeout(() => {
+              modalContent.style.transition = '';
+              modalContent.style.height = '';
+            }, 480);
+          });
+        } else {
+          modalContent.style.height = '';
+        }
+      }
+
+      // 5) 카드 FLIP
+      const newCards = Array.from(pagesListEl.querySelectorAll('[data-page-id]'));
+      newCards.forEach(nc => {
+        const oldRect = positions.get(nc.dataset.pageId);
+        if (!oldRect) return;
+        const newRect = nc.getBoundingClientRect();
+        const dx = oldRect.left - newRect.left;
+        const dy = oldRect.top - newRect.top;
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+
+        nc.style.transition = 'none';
+        nc.style.transform = `translate(${dx}px, ${dy}px)`;
+        void nc.offsetWidth;
+
+        requestAnimationFrame(() => {
+          nc.style.transition = 'transform 0.42s cubic-bezier(0.16, 1, 0.3, 1)';
+          nc.style.transform = '';
+          setTimeout(() => {
+            nc.style.transition = '';
+            nc.style.transform = '';
+          }, 480);
+        });
+      });
+    }
+
+    function buildPagesList() {
+      pagesListEl.innerHTML = '';
+      const sorted = sortedPages();
+      if (sorted.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'pages-empty';
+        empty.textContent = '저장된 페이지가 없어요';
+        pagesListEl.appendChild(empty);
+        return;
+      }
+      sorted.forEach(page => {
+        const card = document.createElement('div');
+        card.className = 'page-card' + (page.id === currentPageId ? ' active' : '');
+        card.dataset.pageId = page.id;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'page-card-content';
+
+        const preview = document.createElement('div');
+        preview.className = 'page-card-preview';
+        const previewHtml = getPagePreviewHtml(page.content);
+        if (previewHtml) {
+          preview.innerHTML = previewHtml;
+        } else {
+          preview.classList.add('empty');
+          preview.textContent = '(빈 페이지)';
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'page-card-meta';
+        meta.textContent = relativeTime(page.updatedAt) + (page.id === currentPageId ? ' · 현재' : '');
+
+        wrap.appendChild(preview);
+        wrap.appendChild(meta);
+
+        const del = document.createElement('button');
+        del.className = 'page-card-delete';
+        del.setAttribute('aria-label', '삭제');
+        del.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+        del.addEventListener('click', (e) => {
+          e.stopPropagation();
+          card.classList.add('deleting');
+          setTimeout(() => {
+            flipLayoutChange(() => {
+              deletePage(page.id);
+              buildPagesList();
+            });
+          }, 300);
+        });
+
+        card.appendChild(wrap);
+        card.appendChild(del);
+
+        card.addEventListener('click', () => {
+          switchToPage(page.id);
+          hidePagesModal();
+        });
+
+        pagesListEl.appendChild(card);
+      });
+    }
+    function showPagesModal() {
+      persistMemo();
+      buildPagesList();
+      pagesModal.classList.add('show');
+    }
+    function hidePagesModal() {
+      pagesModal.classList.remove('show');
+    }
+    pageListBtn.addEventListener('click', showPagesModal);
+    pagesModalClose.addEventListener('click', hidePagesModal);
+    pagesModal.addEventListener('click', (e) => {
+      if (e.target === pagesModal) hidePagesModal();
     });
 
     // ===== Time tint =====
@@ -1054,6 +1786,8 @@
     requestAnimationFrame(updateScrollProgress);
 
     // ===== Init =====
+    loadPages();
+    loadCurrentPageIntoEditor();
     applyTheme();
     setInterval(applyTimeTint, 60_000);
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
